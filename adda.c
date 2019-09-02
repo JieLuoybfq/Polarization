@@ -51,23 +51,23 @@ void adda_set_from_file(Adda * ad, char const * filename){
 //	ad->dir = (char *)malloc(STR_SIZE * sizeof(char));
 	printf("basic done\n");
     char line[STR_SIZE], line2[STR_SIZE];
-	while (fscanf(file, "%s", &line) != EOF) {
+	while (fscanf(file, "%s", &line[0]) != EOF) {
 //		printf("s = %s\n", line);
 		if (strcmp(line, "lambda") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->lambda);
+			fscanf(file, "%s %lf", &line[0], &ad->lambda);
 		} else if (strcmp(line, "alpha") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.alpha);
+			fscanf(file, "%s %lf", &line[0], &ad->euler.alpha);
 		} else if (strcmp(line, "beta") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.beta);
+			fscanf(file, "%s %lf", &line[0], &ad->euler.beta);
 		} else if (strcmp(line, "gamma") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.gamma);
+			fscanf(file, "%s %lf", &line[0], &ad->euler.gamma);
 		} else if (strcmp(line, "run_path") == 0) {
-			fscanf(file, "%s %s", &line, &line2);
+			fscanf(file, "%s %s", &line[0], &line2);
 			strcpy(ad->run_path, line2);
 //			printf("rp = %s\n", ad->run_path);
 		} else if (strcmp(line, "dir") == 0) {
 //			printf("reading dir\n");
-			fscanf(file, "%s %s", &line, &line2);
+			fscanf(file, "%s %s", &line[0], &line2[0]);
 			strcpy(ad->dir, line2);
 //			printf("dir = %s\n", ad->dir);
 			adda_set_dir(ad, ad->dir);
@@ -167,7 +167,7 @@ char * adda_run(Adda const * ad, Scatterer const * sc) {
 		FILE * addalog = fopen("addalog", "r");
 		char dir[64] = "";
 		for(; dir[0] != '\''; )
-			fscanf(addalog, "%s", &dir);
+			fscanf(addalog, "%s", &dir[0]);
 		for(int i = 1; i < strlen(dir); ++i)
 			dir[i - 1] = dir[i];
 		dir[strlen(dir) - 2] = 0;
