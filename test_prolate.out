@@ -1,0 +1,30 @@
+initfile = init
+reading scat parameters from file init
+A shape with 8632 dipoles was created from ../tests/small_prolate/test_prolate.geom file.
+Scatterer:
+m = 1.700000 + 0.100000 * i
+r_eq = 0.100000
+Used shape:
+Parameters of shape read from file ../tests/small_prolate/test_prolate.geom.
+Mass center: x = 7.500000 y = 7.500000 z = 31.500000
+Max momentum axis orientation(degrees): alpha = 0.000000 beta = 90.000000 gamma = 0.000000
+creating adda
+basic done
+Parameters ADDA:
+lambda = 100.000000
+path to run ADDA = ../adda/src/seq/adda
+result directory = ../tests/small_prolate/results
+Orientation of the scatterer:
+alpha = 0.000000
+beta = 0.000000
+gamma = 0.000000
+Propagation direction of the beam:
+x = 0.000000
+y = 0.000000
+z = 1.000000
+
+beta \ gamma                         0.000000                         0.523599                         1.047198                         1.570796 
+beta = 0.000000  -6.6120000e-13 / -0.0000000e+00  -5.3510702e-06 / -5.3510442e-06  -1.6053117e-05 / -1.6053132e-05  -2.1404105e-05 / -2.1404177e-05 
+beta = 0.523599   6.2399999e-14 / -0.0000000e+00  -3.3443997e-06 / -3.3444026e-06  -1.0033187e-05 / -1.0033208e-05  -1.3377585e-05 / -1.3377610e-05 
+beta = 1.047198  -1.7600000e-14 /  0.0000000e+00   6.6888976e-07 /  6.6888052e-07   2.0066423e-06 /  2.0066416e-06   2.6755081e-06 /  2.6755221e-06 
+beta = 1.570796   3.1600000e-13 /  0.0000000e+00   2.6755070e-06 /  2.6755221e-06   8.0265436e-06 /  8.0265662e-06   1.0702079e-05 /  1.0702088e-05 
