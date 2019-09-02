@@ -1,0 +1,68 @@
+filename = ../tests/small_prolate/test_prolate.geom
+A shape with 8632 dipoles was created from ../tests/small_prolate/test_prolate.geom file.
+Parameters of shape read from file ../tests/small_prolate/test_prolate.geom.
+Mass center: x = 7.500000 y = 7.500000 z = 31.500000
+Max momentum axis orientation(degrees): alpha = 0.000000 beta = 90.000000 gamma = 0.000000
+density = 0.004005 volume = 35507.307708 number = 142.189282
+density = 0.004240 volume = 28432.050822 number = 120.561334
+density = 0.004539 volume = 22142.933589 number = 100.507726
+density = 0.004930 volume = 16639.956011 number = 82.029407
+density = 0.005462 volume = 11923.118087 number = 65.128020
+density = 0.006232 volume = 7992.419816 number = 49.806668
+density = 0.007441 volume = 4847.861200 number = 36.071996
+density = 0.009617 volume = 2489.442238 number = 23.941286
+core = 1064 rem-sh = 246
+shell = 617 core = 246 remain = 863 C = 0.234691
+Modificator:
+A = 0.060000
+B = 0.002000
+a = 31.507936
+r_c = 6.301587
+f_m = 0.100000
+C = 0.234691
+Shape contains 8632 dipoles. Distribution:
+r : [0.000000, 3.150794) 136 dipoles or 0.015755 of total, density = 1.037984, expected 0.234691
+r : [3.150794, 6.301587) 928 dipoles or 0.107507 of total, density = 1.011816, expected 0.234691
+r : [6.301587, 9.452381) 2016 dipoles or 0.233550 of total, density = 0.809820, expected 0.009617
+r : [9.452381, 12.603174) 1392 dipoles or 0.161260 of total, density = 0.287137, expected 0.007441
+r : [12.603174, 15.753968) 1136 dipoles or 0.131603 of total, density = 0.142135, expected 0.006232
+r : [15.753968, 18.904761) 1048 dipoles or 0.121409 of total, density = 0.087896, expected 0.005462
+r : [18.904761, 22.055555) 808 dipoles or 0.093605 of total, density = 0.048558, expected 0.004930
+r : [22.055555, 25.206348) 600 dipoles or 0.069509 of total, density = 0.027097, expected 0.004539
+r : [25.206348, 28.357142) 376 dipoles or 0.043559 of total, density = 0.013225, expected 0.004240
+r : [28.357142, 31.507936] 192 dipoles or 0.022243 of total, density = 0.005407, expected 0.004005
+density = 0.234691 volume = 131.023276 number = 30.750000
+layer = 0 136 here 30 remains 106 to delete
+density = 0.234691 volume = 917.162930 number = 215.250000
+layer = 1 928 here 215 remains 713 to delete
+density = 0.009617 volume = 2489.442238 number = 23.941286
+layer = 2 2016 here 23 remains 1993 to delete
+density = 0.007441 volume = 4847.861200 number = 36.071996
+layer = 3 1392 here 36 remains 1356 to delete
+density = 0.006232 volume = 7992.419816 number = 49.806668
+layer = 4 1136 here 49 remains 1087 to delete
+density = 0.005462 volume = 11923.118087 number = 65.128020
+layer = 5 1048 here 65 remains 983 to delete
+density = 0.004930 volume = 16639.956011 number = 82.029407
+layer = 6 808 here 82 remains 726 to delete
+density = 0.004539 volume = 22142.933589 number = 100.507726
+layer = 7 600 here 100 remains 500 to delete
+density = 0.004240 volume = 28432.050822 number = 120.561334
+layer = 8 376 here 120 remains 256 to delete
+density = 0.004005 volume = 35507.307708 number = 142.189282
+layer = 9 192 here 142 remains 50 to delete
+done
+Parameters of shape read from file ../tests/small_prolate/test_prolate_mod.geom.
+Mass center: x = 7.500000 y = 7.500000 z = 31.500000
+Max momentum axis orientation(degrees): alpha = 0.000000 beta = 90.000000 gamma = 0.000000
+Shape contains 862 dipoles. Distribution:
+r : [0.000000, 3.150794) 30 dipoles or 0.034803 of total, density = 0.228967, expected 0.234691
+r : [3.150794, 6.301587) 215 dipoles or 0.249420 of total, density = 0.234419, expected 0.234691
+r : [6.301587, 9.452381) 23 dipoles or 0.026682 of total, density = 0.009239, expected 0.009617
+r : [9.452381, 12.603174) 36 dipoles or 0.041763 of total, density = 0.007426, expected 0.007441
+r : [12.603174, 15.753968) 49 dipoles or 0.056845 of total, density = 0.006131, expected 0.006232
+r : [15.753968, 18.904761) 65 dipoles or 0.075406 of total, density = 0.005452, expected 0.005462
+r : [18.904761, 22.055555) 82 dipoles or 0.095128 of total, density = 0.004928, expected 0.004930
+r : [22.055555, 25.206348) 100 dipoles or 0.116009 of total, density = 0.004516, expected 0.004539
+r : [25.206348, 28.357142) 120 dipoles or 0.139211 of total, density = 0.004221, expected 0.004240
+r : [28.357142, 31.507936] 142 dipoles or 0.164733 of total, density = 0.003999, expected 0.004005

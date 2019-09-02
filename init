@@ -1,0 +1,7 @@
+m_re = 1.7
+m_im = 0.1
+lambda = 100.0
+r_eq = 0.1
+run_path = ../adda/src/seq/adda
+source_file = ../tests/small_prolate/test_prolate.geom
+dir = ../tests/small_prolate/results
