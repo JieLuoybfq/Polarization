@@ -26,9 +26,11 @@ or
 
 It will create the testpol executable that can be run with a command line option -init initfile, where initfile is a file describing adda and scatterer parameters. One such file for example is file "init". 
 
-`./testpol -init init`
+`./testpol -init init > test_prolate.out`
 
 It creates file test_prolate.out which contains some meta information and a table with polarization cross-sections calculated for different gamma and beta angles and their comparison with predicted by Draine for small prolate spheroids. 
+
+***Warning: this is a rather long calculation.***
 
 2) Testing particle modification
 
@@ -44,7 +46,7 @@ ro(r) = A / r + B
 
 with parameters: A = 0.06, B = 0.002, core_radius/full_radius = 0.2, remaining dipoles / starting  = 0.1.
 
-`./testmod -file test_prolate.geom`
+`./testmod -file test_prolate.geom > test_prolatemod.out`
 
 It creates file test_prolate_mod.geom containing the modified shape and test_prolatemod.out containing some information conserning modification, namely distribution of dipoles by layers and a check whether the resulting density follows the dependance above.
 
