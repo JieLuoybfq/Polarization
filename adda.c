@@ -62,7 +62,7 @@ void adda_set_from_file(Adda * ad, char const * filename){
 		} else if (strcmp(line, "gamma") == 0) {
 			fscanf(file, "%s %lf", &line[0], &ad->euler.gamma);
 		} else if (strcmp(line, "run_path") == 0) {
-			fscanf(file, "%s %s", &line[0], &line2);
+			fscanf(file, "%s %s", &line[0], &line2[0]);
 			strcpy(ad->run_path, line2);
 //			printf("rp = %s\n", ad->run_path);
 		} else if (strcmp(line, "dir") == 0) {
