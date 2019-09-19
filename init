@@ -1,7 +1,11 @@
+# optical parameters of the scatterer 
 m_re = 1.7
 m_im = 0.1
 lambda = 100.0
 r_eq = 0.1
+# path to the adda executable
 run_path = ../adda/src/seq/adda
+# file with dipoles of the scatterer
 source_file = ../tests/small_prolate/test_prolate.geom
+# the directory to which adda is going to save its data
 dir = ../tests/small_prolate/results
