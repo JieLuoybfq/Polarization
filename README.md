@@ -44,9 +44,9 @@ At this moment modification creates a particle with homogenous core and a shell 
 
 ro(r) = A / r + B 
 
-with parameters: A = 0.06, B = 0.002, core_radius/full_radius = 0.2, remaining dipoles / starting  = 0.1.
+with parameters: A = 0.6, B = 0.2, core_radius/full_radius = 0.2, remaining dipoles / starting  = 0.3.
 
-`./testmod -file test_prolate.geom > test_prolatemod.out`
+`./testmod -file test_prolate.geom > test_prolate_mod.out`
 
 It creates file test_prolate_mod.geom containing the modified shape and test_prolatemod.out containing some information conserning modification, namely distribution of dipoles by layers and a check whether the resulting density follows the dependance above.
 
@@ -94,4 +94,4 @@ test_prolate.out contains a table comparing calculated cross-section with predic
 
 test_prolate_mod.geom contains the modified shape;
 
-test_prolatemod.out contains information about the modification and checks that the shape actually follows the desired density distribution.
+test_prolate_mod.out contains information about the modification and checks that the shape actually follows the desired density distribution.
