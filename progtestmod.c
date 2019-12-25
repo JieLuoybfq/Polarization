@@ -29,12 +29,14 @@ int main(int argc, char *argv[]) {
 	Modificator m;
 //	printf("file000 = %s\n", my_shape.source_file);
 //	modificator_set(&m, density, 0.1, 0.002, 0.2, &my_shape, 0.2, 10);
-	modificator_set(&m, density, 0.06, 0.002, 0.1, &my_shape, 0.2, 10);
+	modificator_set(&m, density, 0.06, 0.002, 0.1, &my_shape, 0.2, 10, 1.0);
 	modificator_print_parameters(&m);
 	check_distribution(&my_shape, 10, &m);
 //	printf("file000 = %s\n", my_shape.source_file);
+//	printf("doing\n");
 	Shape mod_shape = get_modified_shape(&my_shape, density, &m);
 	printf("done\n");
+	modificator_delete(&m);
 	shape_print_parameters(&mod_shape);
 	check_distribution(&mod_shape, 10, &m);	
 	shape_delete(&my_shape);

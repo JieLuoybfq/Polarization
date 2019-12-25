@@ -21,14 +21,16 @@ double density(double r, Modificator const * m) {
 }
 
 // number of remaining dipoles in layer from r1 to r2
-double fraction(Density_func df, double r1, double r2, Modificator const * m) {
+double fraction(Density_func df, double r1, double r2, Modificator const * m, Shape const * sh, int k) {
 //	printf("r1 = %lf, r2 = %lf\n", r1, r2);
-	printf("density = %lf volume = %lf number = %lf\n", df((r1 + r2) / 2.0, m), volume_spherical_layer(r1, r2), 
-	volume_spherical_layer(r1, r2) * df((r1 + r2) / 2.0, m));
-	return volume_spherical_layer(r1, r2) * df((r1 + r2) / 2.0, m);
+	printf("density = %lf volume = %lf number = %lf\n", df((r1 + r2) / 2.0, m), m->initial_shape_volumes[k], 
+	m->initial_shape_volumes[k] * df((r1 + r2) / 2.0, m));
+//	printf("volume = %lf\n", m->initial_shape_volumes[k]);
+//	volume_spherical_layer(r1, r2) * df((r1 + r2) / 2.0, m));
+	return m->initial_shape_volumes[k] * df((r1 + r2) / 2.0, m);
 }
 
-void modificator_set(Modificator * m, Density_func df, double A, double B, double f_m, Shape const * sh, double x, int n) {
+void modificator_set(Modificator * m, Density_func df, double A, double B, double f_m, Shape const * sh, double x, int n, double dipole_volume) {
 	m->A = A;
 	m->B = B;
 	m->f_m = f_m;
@@ -36,6 +38,7 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 	m->r_c = x * m->a;
 	m->n = n;
 	m->C = 0.0;
+	m->initial_shape_volumes = (double*)malloc((m->n) * sizeof(double));
 	int remain = sh->number * f_m;
 	int shell = 0;
 	int core = 0;
@@ -50,10 +53,12 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 		++d[(int)(len / m->a * m->n)];
 	}
 	d[n - 1] += d[n];
+	for(int i = 0; i < n; ++i)
+		m->initial_shape_volumes[i] = dipole_volume * d[i];
 	int i = n - 1;
 //	printf("here\n");
 	for(i = n - 1; i > 0 && i * da >= m->r_c; --i) {
-		int need = fraction(df, i * da, (i + 1) * da, m);
+		int need = fraction(df, i * da, (i + 1) * da, m, sh, i);
 		if(d[i] < need) {
 			printf("we need %d dipoles in %d layer, but there are only %d\n", need, i, d[i]);
 		}
@@ -61,6 +66,8 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 	}
 	if(remain <= shell) {
 		printf("Too much materialin the shell. The core is empty.\n");
+		printf("Can't achieve the required factor %lf. Least possible number of dipoles is %d.\n \
+Least possible factor is %lf.\n", m->f_m,shell, (double)shell/sh->number);
 		shell = remain;
 	}
 //	printf("here\n");
@@ -74,6 +81,10 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 	}
 	m->C = (double)core / volume_spherical_layer(0, m->r_c);
 	printf("shell = %d core = %d remain = %d C = %lf\n", shell, core, remain, m->C);
+}
+
+void modificator_delete(Modificator * m) {
+	free(m->initial_shape_volumes);
 }
 
 void modificator_print_parameters(Modificator const * m) {
@@ -106,7 +117,7 @@ Shape get_modified_shape(Shape const * base_shape, Density_func df, Modificator 
 		vector_length_sqr(sh->dipoles + k) < (i + 1) * (i + 1) * dr * dr; ++k);
 		if(i == m->n - 1)
 			k = sh->number;
-		int remain = (int)(fraction(df, i * dr, (i + 1) * dr, m));
+		int remain = (int)(fraction(df, i * dr, (i + 1) * dr, m, sh, i));
 		int dp = (int)fmax((double)(k - j) - remain, 0.0);
 		printf("layer = %ld %d here %d remains %d to delete\n", i, k - j, remain, dp);
 		for(int p = 0; p < dp; ) {
@@ -164,10 +175,10 @@ void check_distribution(Shape const * sh, int n, Modificator const * m) {
 	for(int i = 0; i < n - 1; ++i) {
 		printf("r : [%f, %f) %d dipoles or %f of total, density = %f, expected %f\n", 
 		i * da, da * (i + 1), d[i], (double)d[i] / sh->number, 
-		(double)d[i] / volume_spherical_layer(da * i, da * (i + 1)), density(da * (i + 0.5), m));
+		(double)d[i] / m->initial_shape_volumes[i], density(da * (i + 0.5), m));
 	}
 	printf("r : [%f, %f] %d dipoles or %f of total, density = %f, expected %f\n", 
 	da * (n - 1), m->a, d[n - 1], (double)d[n - 1] / sh->number, 
-	(double)d[n - 1] / volume_spherical_layer(da * (n - 1), m->a), density(da * (n - 0.5), m));
+	(double)d[n - 1] / m->initial_shape_volumes[n - 1], density(da * (n - 0.5), m));
 	free(d);
 }
