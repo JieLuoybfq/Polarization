@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "scatterer.h"
 #include "adda.h"
@@ -36,6 +37,37 @@ double differential_polarization(Adda const * ad, Scatterer const * sc) {
 	Cabs_par = get_Cabs(file_x);
 	Cabs_per = get_Cabs(file_y);
 	free(dirname);
+	return (Cabs_par - Cabs_per);
+}
+
+/* Здесь нужно одно через другое выразить*/
+/* Directory version*/
+double differential_polarization_dir(char const * dir, Scatterer const * sc) {
+	
+	char const * dirname = dir;
+//	printf("dirname = %s\n", dirname);
+	double Cabs_par = 0.0;
+	double Cabs_per = 0.0;
+	char file_x[STR_SIZE];
+	char file_y[STR_SIZE];
+//	printf("here\n");
+	strcpy(file_x, dirname);
+	strcpy(file_y, dirname);
+	strcat(file_x, "/CrossSec-X");
+	strcat(file_y, "/CrossSec-Y");
+//	printf("here\n");
+//	printf("file_x = %s\n", file_x);
+//	printf("file_y = %s\n", file_y);
+	if( access( file_x, R_OK ) != -1 ) {
+		Cabs_par = get_Cabs(file_x);
+		Cabs_per = get_Cabs(file_y);
+	} else {
+		return 0;
+	}
+/*	free(dirname);
+
+*/
+//	printf("here\n");
 	return (Cabs_par - Cabs_per);
 }
 
@@ -127,6 +159,41 @@ double polarization_cross_section(Scatterer const * sc, double beta, double gamm
 			EulerOrientation total = euler_make_from_quater(&qtot);
 			adda_set_euler(ad, &total);
 			result += dtheta * domega * differential_polarization(ad, sc);
+		}
+	}
+	
+	return result / (4.0 * PI * PI);
+}
+
+/*Directory version*/
+double polarization_cross_section_dir(Scatterer const * sc, double beta, double gamma, int ntheta, int nomega, char const * dir, int * pcnt) {
+//	printf("Calculating polarization cross-section.\n");
+			char dirname[STR_SIZE];
+//	Vector prop = vector_make_from_spherical(gamma, 0.0);
+//	adda_set_prop(ad, &prop);
+//		printf("here\n");
+//	adda_print_parameters(ad);
+//	EulerOrientation system = euler_make(0.0, PI - sc->shape.max_momentum_axis.beta, 2.0 * PI - sc->shape.max_momentum_axis.alpha);
+//	EulerOrientation magnet = euler_make(0.0, beta, 0.0);
+/*	ScatPosition sp = {sc, ad, &system, &magnet};
+	double result = integr_trap_2d(0.0, 2.0 * PI, ntheta, 0.0, 2.0 * PI, nomega, pol_integr_func, &sp);
+*/	double dtheta = 2.0 * PI / ntheta;
+	double domega = 2.0 * PI / nomega;
+	double result  = 0.0;
+	for(int i = 0; i < nomega; ++i) {
+//		magnet.alpha = i * domega;
+//		Quaternion qmag = quater_make_from_euler(&magnet);
+		for(int j = 0; j < ntheta; ++j) {
+//			printf("i = %d j = %d\n", i, j);
+//			system.alpha = j * dtheta;
+//			Quaternion qsys = quater_make_from_euler(&system);
+//			Quaternion qtot = quater_composition(&qsys, &qmag);
+//			EulerOrientation total = euler_make_from_quater(&qtot);
+//			adda_set_euler(ad, &total);
+			sprintf(dirname, "%s/adda_run_%d", dir, *pcnt);
+//			printf("%s\n", dirname);
+			++(*pcnt);
+			result += dtheta * domega * differential_polarization_dir(dirname, sc);
 		}
 	}
 	

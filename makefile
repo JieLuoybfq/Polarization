@@ -1,5 +1,7 @@
 testpol : progtestpol.o polarization.o geometry.o orientation.o vector.o constants.o shape.o adda.o scatterer.o
 		gcc -std=c99 $^ -lm -o testpol
+testpoldir : progtestpoldir.o polarization.o geometry.o orientation.o vector.o constants.o shape.o adda.o scatterer.o
+		gcc -std=c99 $^ -lm -o testpoldir
 
 constants.o : constants.c 
 		gcc -std=c99 -c $<
@@ -24,6 +26,8 @@ adda.o : adda.c adda.h scatterer.h constants.h
 polarization.o : polarization.c adda.h scatterer.h orientation.h constants.h
 		gcc -std=c99 -c $<
 progtestpol.o : progtestpol.c polarization.h constants.h adda.h scatterer.h
+		gcc -std=c99 -c $<
+progtestpoldir.o : progtestpoldir.c polarization.h constants.h adda.h scatterer.h
 		gcc -std=c99 -c $<
 		
 modify.o : modify.c modify.h constants.h shape.h geometry.h vector.h
