@@ -82,15 +82,25 @@ b) to calculate in a range of wavelength with m taken from a file:
 `./pol -init init -sp SilicateDraine03.RI -lam0 0.15 -n 3 -k 10 -int r -result result.out`
 
 Description of the command line options:
+
   -init initfile - set file with metainformation about ADDA and the scatterer,
+  
   -result resultfile - set file for the resulting table ,
+  
   -int integration_method - set integration method, r for rectangles, gx for gauss, x from 1 to 6 - degree (optional, default r),
+  
   -sp specfile - set the name of file with wavelength and refraction coefficient in the form lambda m_re m-im (use either this option or -lam and -m),
+  
   -lam0 lam0 - if -sp is used, the calculation will start from the first wavelength in the file not less than lam0 (optional, default lam0 = 0),
+  
   -n n - if -sp is used, sets the number of wavelength points to read from that file (optional, default n = 1),
+  
   -k k - if -sp is used, use every kth point starting from lam0 (optional, default k = 1),
+  
   -lam lam - set wavelength for calculation (if -sp is not used),
+  
   -m m_re m_im - set refraction index for calculation (if -sp is not used),
+  
   -h - view list of options.
 
 # File description:
