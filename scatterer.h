@@ -5,16 +5,20 @@
 typedef struct Scatterer {
 	
 	Shape shape;
-	double m_re;
-	double m_im;
 	double r_eq;
 	
 } Scatterer;
 
-void scat_set(Scatterer *, char const *, double, double, double);
+// constructor
+// shape is set from the adda file (.geom), size(r_eq) is set manually
+void scat_set(Scatterer *, char const *, double);
 
+// constructor
+// set from the init file
 void scat_set_from_file(Scatterer *, char const *);
 
+// destructor
 void scat_delete(Scatterer *);
 
+// print parameters
 void scat_print(Scatterer const *);

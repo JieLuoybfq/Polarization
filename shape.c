@@ -8,11 +8,14 @@
 #include "geometry.h"
 #include "constants.h"
 
+// calculates and saves the center of the shape
 void shape_set_mass_center(Shape * sh) {
 	Vector center = vector_average(sh->dipoles, sh->dipoles + sh->number);
 	vector_copy(&sh->mass_center, &center);
 }
 
+// calculates the angular momentum of the shape moved by -offset rotated by f 
+// relative to the z axis  
 double shape_momentum_z(Shape const * sh, EulerOrientation const * f, Vector const * offset) {
 	double im = 0.0;
 	for(Vector * v = sh->dipoles; v != sh->dipoles + sh->number; ++v) {
@@ -23,6 +26,10 @@ double shape_momentum_z(Shape const * sh, EulerOrientation const * f, Vector con
 	return im;
 }
 
+// calculates the maximum momentum of the shape and the direction of such axis
+// search is made for Euler angles alpha and beta of the shape rotation
+// nb represents the error of beta (db = PI / nb)
+// da is assumed as db * sin(beta)
 void shape_set_max_momentum_axis(Shape * sh, size_t nb) {
 	EulerOrientation cur = {0.0, 0.0, 0.0};
 	euler_set(&sh->max_momentum_axis, 0.0, 0.0, 0.0);
@@ -43,6 +50,7 @@ void shape_set_max_momentum_axis(Shape * sh, size_t nb) {
 	}
 }
 
+// constructor from .geom file
 void shape_set(Shape * sh, char const * fname) {
 	sh->source_file = (char *)malloc(STR_SIZE * sizeof(char));
 	strcpy(sh->source_file, fname);
@@ -68,6 +76,7 @@ void shape_set(Shape * sh, char const * fname) {
 	printf("A shape with %ld dipoles was created from %s file.\n", sh->number, sh->source_file);
 }
 
+// copy constructor
 Shape shape_copy(Shape const * sh) {
 	Shape new = {NULL, sh->number, sh->size, sh->mass_center, sh->max_momentum_axis, NULL};
 	new.source_file = (char*)malloc(STR_SIZE * sizeof(char));
@@ -78,6 +87,7 @@ Shape shape_copy(Shape const * sh) {
 	return new;
 }
 
+// destructor
 void shape_delete(Shape * sh) {
 	free(sh->source_file);
 	free(sh->dipoles);
@@ -87,6 +97,7 @@ void shape_delete(Shape * sh) {
 	euler_set(&sh->max_momentum_axis, 0.0, 0.0, 0.0);
 }
 
+// Printing metainformation
 void shape_print_parameters(Shape const * sh) {
 	printf("Parameters of shape read from file %s.\n", sh->source_file);
 	printf("Mass center: x = %lf y = %lf z = %lf\n", sh->mass_center.x, sh->mass_center.y, sh->mass_center.z);
@@ -96,6 +107,7 @@ void shape_print_parameters(Shape const * sh) {
 	sh->max_momentum_axis.gamma * 180 / PI);
 }
 
+// Printing dipoles coordinates (like the source .geom without meta)
 void shape_print_dipoles(Shape const * sh) {
 	printf("%ld dipoles of shape read from file %s.\n", sh->number, sh->source_file);
 	for(size_t i = 0; i < sh->number; ++i) {
@@ -103,6 +115,7 @@ void shape_print_dipoles(Shape const * sh) {
 	}
 }
 
+// move shape by vector
 void shape_move(Shape * sh, Vector const * r) {
 	for(size_t i = 0; i < sh->number; ++i) {
 		vector_set(sh->dipoles + i, sh->dipoles[i].x + r->x, 
@@ -110,6 +123,7 @@ void shape_move(Shape * sh, Vector const * r) {
 	}
 }
 
+// calculate the spacial parameter of the shape (in ADDA units)
 double shape_max_center_dist(Shape const * sh) {
 	double len2 = 0.0;
 	for(int i = 0; i < sh->number; ++i) {

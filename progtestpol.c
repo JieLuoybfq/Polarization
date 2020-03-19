@@ -12,13 +12,16 @@
 //Program for comparison with formulas for small prolate spheroid from prolate_ellipsoidz.geom
 
 int main(int argc, char *argv[]) {
-	char initfile[STR_SIZE];
+	char initfile[STR_SIZE] = "";
+	char resultfile[STR_SIZE] = "result.txt";
 	for(int i = 1; i < argc - 1; i += 2) {
 		if (strcmp(argv[i], "-init") == 0) {
 			strcpy(initfile, argv[i + 1]);
+		} if (strcmp(argv[i], "-result") == 0) {
+			strcpy(resultfile, argv[i + 1]);
 		} else {
 			printf("%s\n", argv[i]);
-			printf("Unrecognized option. Please, use -adda, -dir or -file.\n");
+			printf("Unrecognized option. Please, use -init or -result.\n");
 			return 0;
 		} 
 	}
@@ -27,10 +30,11 @@ int main(int argc, char *argv[]) {
 	Scatterer my_scat;
 	scat_set_from_file(&my_scat, initfile);
 	scat_print(&my_scat);
-	printf("creating adda\n");
+
 	Adda my_adda;
 	adda_set_from_file(&my_adda, initfile);
 	adda_print_parameters(&my_adda);
+
 	int n = 3;
 	int m = 3;
 	double dbeta = PI / 2.0 / n;

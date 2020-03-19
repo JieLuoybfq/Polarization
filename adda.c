@@ -1,12 +1,25 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
 #include "adda.h"
 #include "scatterer.h"
 #include "constants.h"
+#include "spectrum.h"
 
+// default constructor
+void adda_set(Adda * ad) {		
+	ad->run_path = (char *)malloc(STR_SIZE * sizeof(char));
+	ad->dir = (char *)malloc(STR_SIZE * sizeof(char));
+	strcpy(ad->run_path, "");
+	strcpy(ad->dir, "");
+	ad->euler = (EulerOrientation){0.0, 0.0, 0.0};
+	ad->prop = (Vector){0.0, 0.0, 1.0};
+}
+
+// set specific fields
 void adda_set_euler(Adda * ad, EulerOrientation const * orient) {
 	ad->euler.alpha = orient->alpha;
 	ad->euler.beta = orient->beta;
@@ -19,71 +32,52 @@ void adda_set_prop(Adda * ad, Vector const * p) {
 	ad->prop.z = p->z;
 }
 
-void adda_set(Adda * ad, double lam, char const * path) {		
-	ad->lambda = lam;
-	ad->run_path = (char *)malloc(STR_SIZE * sizeof(char));
-	ad->dir = (char *)malloc(STR_SIZE * sizeof(char));
-	strcpy(ad->run_path, path);
-	strcpy(ad->dir, "");
-	EulerOrientation or = {0.0, 0.0, 0.0};
-	Vector prop = {0.0, 0.0, 1.0};
-	adda_set_euler(ad, &or);
-	adda_set_prop(ad, &prop);
-}
-
 void adda_set_dir(Adda * ad, char const * dirname) {
 	int result = mkdir(dirname, 0777);
-	if(result == 0) {
-		char filename[128] = "";
-		strcpy(filename, dirname);
-		strcat(filename, "/adda_counter");
-		FILE * fout = fopen(filename, "w");
-		fprintf(fout, "0\n");
-		fclose(fout);
+	char counterfile[STR_SIZE];
+	strcpy(counterfile, dirname);
+	strcat(counterfile, "/adda_counter");
+	if(result == 0 || access(counterfile, F_OK) == -1) {
+		FILE * cntf = fopen(counterfile, "w");
+		fprintf(cntf, "0\n");
+		fclose(cntf);
 	}
-//	strcpy(ad->dir, dirname);
+	if(ad->dir != dirname) {
+		strcpy(ad->dir, dirname);
+	}
 }
 
+// constructor from the init file
 void adda_set_from_file(Adda * ad, char const * filename){
 	FILE * file = fopen(filename, "r");
-	adda_set(ad, 2.0 * PI, "");
-//	ad->run_path = (char *)malloc(STR_SIZE * sizeof(char));
-//	ad->dir = (char *)malloc(STR_SIZE * sizeof(char));
-	printf("basic done\n");
+	adda_set(ad);
     char line[STR_SIZE], line2[STR_SIZE];
-	while (fscanf(file, "%s", &line) != EOF) {
-//		printf("s = %s\n", line);
-		if (strcmp(line, "lambda") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->lambda);
-		} else if (strcmp(line, "alpha") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.alpha);
-		} else if (strcmp(line, "beta") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.beta);
-		} else if (strcmp(line, "gamma") == 0) {
-			fscanf(file, "%s %lf", &line, &ad->euler.gamma);
+	while (fscanf(file, "%s", line) != EOF) {
+		if (strcmp(line, "euler.alpha") == 0) {
+			fscanf(file, "%s %lf", line, &ad->euler.alpha);
+		} else if (strcmp(line, "euler.beta") == 0) {
+			fscanf(file, "%s %lf", line, &ad->euler.beta);
+		} else if (strcmp(line, "euler.gamma") == 0) {
+			fscanf(file, "%s %lf", line, &ad->euler.gamma);
 		} else if (strcmp(line, "run_path") == 0) {
-			fscanf(file, "%s %s", &line, &line2);
-			strcpy(ad->run_path, line2);
-//			printf("rp = %s\n", ad->run_path);
+			fscanf(file, "%s %s", line, ad->run_path);
 		} else if (strcmp(line, "dir") == 0) {
-//			printf("reading dir\n");
-			fscanf(file, "%s %s", &line, &line2);
-			strcpy(ad->dir, line2);
-//			printf("dir = %s\n", ad->dir);
-			adda_set_dir(ad, ad->dir);
+			fscanf(file, "%s %s", line, line2);
+			adda_set_dir(ad, line2);
 		}  
 	}
 	fclose(file);
 }
 
+// destructor
 void adda_delete(Adda * ad) {
 	free(ad->run_path);
 	free(ad->dir);
 }
 
+// print metainformation int the standard output
 void adda_print_parameters(Adda const * ad) {
-	printf("Parameters ADDA:\n");
-	printf("lambda = %lf\n", ad->lambda);
+	printf("Parameters of ADDA:\n");
 	printf("path to run ADDA = %s\n", ad->run_path);
 	if(strcmp(ad->dir, ".") == 0)
 		printf("result directory = ADDA default\n");
@@ -100,16 +94,22 @@ void adda_print_parameters(Adda const * ad) {
 	printf("\n");
 }
 
-char * adda_run(Adda const * ad, Scatterer const * sc) {
+// run ADDA with parameters set into the adda structure on the specific scatterer. 
+// Returns the name of a directory to which ADDA saved the calculated files
+char * adda_run(Adda const * ad, Scatterer const * sc, Spectrum_point const * sp) {
+
 	char * result = (char *)malloc(STR_SIZE * sizeof(char));
 	
-	char m[64] = "";
-	char eu[64] = "";
-	char lam[64] = "";
-	char r[64] = "";
-	char prop[64] = "";
-	sprintf(m, "%lf %lf", sc->m_re, sc->m_im);
-	sprintf(lam, "%lf", ad->lambda);
+// creation of the ADDA command	
+
+// prepare string with parameters
+	char m[STR_SIZE];
+	char eu[STR_SIZE];
+	char lam[STR_SIZE];
+	char r[STR_SIZE];
+	char prop[STR_SIZE];
+	sprintf(m, "%lf %lf", sp->m_re, sp->m_im);
+	sprintf(lam, "%lf", sp->lambda);
 	sprintf(eu, "%lf %lf %lf", 
 	(ad->euler.alpha) * 180 / PI, 
 	(ad->euler.beta) * 180 / PI, 
@@ -118,7 +118,9 @@ char * adda_run(Adda const * ad, Scatterer const * sc) {
 	sprintf(prop, "%lf %lf %lf", 
 	ad->prop.x, ad->prop.y, ad->prop.z); 
 	
-	char command[1024] = "./";
+// concatenate the prepared strings into 1 command
+	char command[STR_SIZE];
+	strcpy(command, "./");
 	strcat(command, ad->run_path);
 	
 	strcat(command, " -shape read ");
@@ -136,9 +138,13 @@ char * adda_run(Adda const * ad, Scatterer const * sc) {
 	strcat(command, " -prop ");
 	strcat(command, prop);
 	
+// if the result directory is specified (it must be set to adda structure beforehand), 
+// read the number of adda_run directories already there, set the next and add it to
+// the ADDA command and to the return value "result"
+
 	if(strcmp(ad->dir, "") != 0) {
-		char dir[64] = "";
-		char filename[128] = "";
+		char dir[STR_SIZE];
+		char filename[STR_SIZE];
 		int c = 0;
 		strcpy(filename, ad->dir);
 		strcat(filename, "/adda_counter");
@@ -147,7 +153,7 @@ char * adda_run(Adda const * ad, Scatterer const * sc) {
 		fclose(fin);
 		char number[8] = "";
 		sprintf(number, "%d", c);
-		strcat(dir, ad->dir);
+		strcpy(dir, ad->dir);
 		strcat(dir, "/adda_run_");
 		strcat(dir, number);
 		FILE * fout = fopen(filename, "w");
@@ -158,21 +164,27 @@ char * adda_run(Adda const * ad, Scatterer const * sc) {
 		strcat(command, dir);
 		strcpy(result, dir);
 	}
-	
 	strcat(command, " > addalog\n");
 	
 //	printf("command = %s", command);
+
+// execute the command
 	system(command);
+
+// if a specific directory was not set previously and ADDA saved everything to it's default directory
+// obtain "result" from the ADDA metainformation saved to addalog file
 	if(strcmp(ad->dir, "") == 0) {
 		FILE * addalog = fopen("addalog", "r");
-		char dir[64] = "";
+		char dir[STR_SIZE];
+		strcpy(dir, "");
 		for(; dir[0] != '\''; )
-			fscanf(addalog, "%s", &dir);
+			fscanf(addalog, "%s", dir);
 		for(int i = 1; i < strlen(dir); ++i)
 			dir[i - 1] = dir[i];
 		dir[strlen(dir) - 2] = 0;
 		fclose(addalog);
 		strcpy(result, dir);
 	}
+	
 	return result;	
 }

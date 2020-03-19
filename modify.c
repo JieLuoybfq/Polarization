@@ -10,33 +10,39 @@
 #include "geometry.h"
 #include "constants.h"
 
-// volume density in dipoles / volume (adda units)
+// (supposed) volume density in dipoles / volume (adda units)
 double density(double r, Modificator const * m) {
 	if(r < m->r_c)
 		return m->C;
 	if(r > m->a)
 		return 0.0;
-//	printf("r = %lf, df = %lf\n", r, m->A / r + m->B);
 	return m->A / r + m->B;
 }
 
 // number of remaining dipoles in layer from r1 to r2
 double fraction(Density_func df, double r1, double r2, Modificator const * m, Shape const * sh, int k) {
-//	printf("r1 = %lf, r2 = %lf\n", r1, r2);
-	printf("density = %lf volume = %lf number = %lf\n", df((r1 + r2) / 2.0, m), m->initial_shape_volumes[k], 
-	m->initial_shape_volumes[k] * df((r1 + r2) / 2.0, m));
-//	printf("volume = %lf\n", m->initial_shape_volumes[k]);
-//	volume_spherical_layer(r1, r2) * df((r1 + r2) / 2.0, m));
-	return m->initial_shape_volumes[k] * df((r1 + r2) / 2.0, m);
+// volume of the layer inside a particle * required density of particles = 
+// supposed number of dipoles to remain
+	return m->initial_shape_volumes[k] * df((r1 + r2) / 2.0, m); 
 }
 
-void modificator_set(Modificator * m, Density_func df, double A, double B, double f_m, Shape const * sh, double x, int n, double dipole_volume) {
+void modificator_set(
+		Modificator * m, 
+		Density_func df, 
+		double A, double B, 
+		double f_m, 
+		Shape const * sh, 
+		double x,                 // core radius / full radius (maximum axis if not spherical)
+		int n, 
+		double dipole_volume) {
+// set what we know
 	m->A = A;
 	m->B = B;
 	m->f_m = f_m;
 	m->a = shape_max_center_dist(sh);
 	m->r_c = x * m->a;
 	m->n = n;
+	
 	m->C = 0.0;
 	m->initial_shape_volumes = (double*)malloc((m->n) * sizeof(double));
 	int remain = sh->number * f_m;
@@ -46,17 +52,18 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 	for(int i = 0; i <= n; ++i)
 		d[i] = 0;
 	double da = m->a / n;
-//	printf("here\n");
+// count dipoles by layers
 	for(int i = 0; i < sh->number; ++i) {
 		double len = vector_distance(sh->dipoles + i, &sh->mass_center);
-//		printf("len = %d\n", (int)(len / m->a * m->n));
 		++d[(int)(len / m->a * m->n)];
 	}
 	d[n - 1] += d[n];
+// here d[i] = number of initial dipoles in the ith layer
+// set initial_shape_volumes
 	for(int i = 0; i < n; ++i)
 		m->initial_shape_volumes[i] = dipole_volume * d[i];
+// calculate shell = number of dipoles supposed to remain outside of the core
 	int i = n - 1;
-//	printf("here\n");
 	for(i = n - 1; i > 0 && i * da >= m->r_c; --i) {
 		int need = fraction(df, i * da, (i + 1) * da, m, sh, i);
 		if(d[i] < need) {
@@ -64,29 +71,34 @@ void modificator_set(Modificator * m, Density_func df, double A, double B, doubl
 		}
 		shell += (int)fmin(d[i], need);
 	}
+// if shell > remain we can't make the shape with required density distribution and 
+// f_m out of the initial shape just by removing dipoles
 	if(remain <= shell) {
 		printf("Too much materialin the shell. The core is empty.\n");
 		printf("Can't achieve the required factor %lf. Least possible number of dipoles is %d.\n \
 Least possible factor is %lf.\n", m->f_m,shell, (double)shell/sh->number);
 		shell = remain;
 	}
-//	printf("here\n");
 	for(int j = i; j >= 0; --j)
 		core += d[j];
-	printf("core = %d rem-sh = %d\n", core, remain - shell);
+// everything in remain = f_m * initial_dipoles - shell must be in the core
+// if initially there were less material than remain - shell,
+// that we can't just remove dipoles
 	if(core < remain - shell) {
 		printf("Too much material for the core.\n");
 	} else {
 		core = remain - shell;
 	}
+// set the core density
 	m->C = (double)core / volume_spherical_layer(0, m->r_c);
-	printf("shell = %d core = %d remain = %d C = %lf\n", shell, core, remain, m->C);
 }
 
+// destructor
 void modificator_delete(Modificator * m) {
 	free(m->initial_shape_volumes);
 }
 
+// print
 void modificator_print_parameters(Modificator const * m) {
 	printf("Modificator:\n");
 	printf("A = %lf\n", m->A);
@@ -97,11 +109,14 @@ void modificator_print_parameters(Modificator const * m) {
 	printf("C = %lf\n", m->C);
 }
 
+// remove some dipoles if the shape's so that the remaining dipoles are distributed according 
+// to the df with m denoting parameters of the distribution
 Shape get_modified_shape(Shape const * base_shape, Density_func df, Modificator const * m) {
 
 	Shape new_shape = shape_copy(base_shape);
 	Shape * sh = &new_shape;
 
+// sort the dipoles by their distance to the center
 	Vector rc = vector_opposite(&sh->mass_center);
 	shape_move(sh, &rc);
 	qsort(sh->dipoles, sh->number, sizeof(Vector), vector_compare_length);
@@ -118,6 +133,7 @@ Shape get_modified_shape(Shape const * base_shape, Density_func df, Modificator 
 		if(i == m->n - 1)
 			k = sh->number;
 		int remain = (int)(fraction(df, i * dr, (i + 1) * dr, m, sh, i));
+// to remove
 		int dp = (int)fmax((double)(k - j) - remain, 0.0);
 		printf("layer = %ld %d here %d remains %d to delete\n", i, k - j, remain, dp);
 		for(int p = 0; p < dp; ) {
@@ -126,7 +142,6 @@ Shape get_modified_shape(Shape const * base_shape, Density_func df, Modificator 
 				sh->dipoles[j + q].x = sh->dipoles[j + q].y 
 				= sh->dipoles[j + q].z = MAX_COORD;
 				++p;
-//				printf("lalala\n");
 			}
 		}
 	}
@@ -162,15 +177,18 @@ Shape get_modified_shape(Shape const * base_shape, Density_func df, Modificator 
 	return new_shape;
 }
 
+// prints the distribution of the shape's dipoles over r
 void check_distribution(Shape const * sh, int n, Modificator const * m) {
 	int * d = (int *)malloc((n + 1) * sizeof(int));
 	double da = m->a / n;
+// count the dipoles by layers
 	for(int i = 0; i <= n; ++i)
 		d[i] = 0;
 	for(Vector * p = sh->dipoles; p != sh->dipoles + sh->number; ++p) {
 		++d[(int)floor(vector_distance(p, &sh->mass_center) / m->a * n)];
 	}
 	d[n - 1] += d[n];
+
 	printf("Shape contains %ld dipoles. Distribution:\n", sh->number);
 	for(int i = 0; i < n - 1; ++i) {
 		printf("r : [%f, %f) %d dipoles or %f of total, density = %f, expected %f\n", 

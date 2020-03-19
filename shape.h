@@ -16,17 +16,23 @@ typedef struct Shape {
 	
 } Shape;
 
+// constructor from .geom file
 void shape_set(Shape *, char const *);
 
+// constructor from .geom file
 Shape shape_copy(Shape const *);
 
+// destructor
 void shape_delete(Shape *);
 
+// Printing 
+// metainformation
 void shape_print_parameters(Shape const *);
- 
+// dipoles coordinates (like the source .geom without meta)
 void shape_print_dipoles(Shape const *); 
 
-
+// move shape by vector
 void shape_move(Shape *, Vector const *);
 
+// calculate the spacial parameter of the shape (in ADDA units)
 double shape_max_center_dist(Shape const *);
