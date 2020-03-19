@@ -1,14 +1,13 @@
-# optical parameters of the scatterer 
+# size parameter of the scatterer 
 r_eq = 0.1
 # calculation boundaries in the format: lower_bound upper_bound number_of_points
 beta = 30 30 1
 gamma = 60 60 1
 #parameters of the integration precision: over_theta over_omega
-precision = 100 100
+precision = 10 10
 # path to the adda executable
 run_path = ../adda/src/seq/adda
 # file with dipoles of the scatterer
-source_file = ../tests/integrtest.geom
-#source_file = test_prolate.geom
+source_file = test_prolate.geom
 # the directory to which adda is going to save its data
 dir = ../tests/small_prolate/results
